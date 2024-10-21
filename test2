@@ -1,0 +1,623 @@
+1.USERNAME PASS
+2.EMP NAME DEPT SAL
+3.EMP USING CURSOR
+4.FL NAME
+5.EMP
+6.API ADAPTER
+7.ALC
+8.FRAGMENT
+9.INTENT
+10.USER DETAILS
+11.STU LIST
+12.DATE TIME DIALOG
+13.WEBVIEW
+14.DART
+15.2 FRAGMENTS
+
+
+
+
+
+1> Username pass
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/username"
+        android:hint="Password"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/password"
+        android:text="Login" />
+</RelativeLayout>
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText usernameEditText;
+    private EditText passwordEditText;
+    private Button loginButton;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        usernameEditText = findViewById(R.id.username);
+        passwordEditText = findViewById(R.id.password);
+        loginButton = findViewById(R.id.loginButton);
+
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                validateLogin();
+            }
+        });
+    }
+
+    private void validateLogin() {
+        String username = usernameEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+
+        // Check if fields are empty
+        if (username.isEmpty()) {
+            Toast.makeText(this, "Username is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (password.isEmpty()) {
+            Toast.makeText(this, "Password is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (username.equals("Abc") && password.equals("123")) {
+            Toast.makeText(this, "You have logged in successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
+
+
+2>Emplyoee db
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/eid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Employee ID" />
+
+    <EditText
+        android:id="@+id/ename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eid"
+        android:hint="Employee Name" />
+
+    <EditText
+        android:id="@+id/adept"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ename"
+        android:hint="Department" />
+
+    <EditText
+        android:id="@+id/esalary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/adept"
+        android:hint="Salary"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/insertButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/esalary"
+        android:text="Insert Employee" />
+</RelativeLayout>
+
+EmployeeDatabaseHelper.java
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class EmployeeDatabaseHelper extends SQLiteOpenHelper {
+
+    private static final String DATABASE_NAME = "employee.db";
+    private static final int DATABASE_VERSION = 1;
+    private static final String TABLE_EMPLOYEE = "employee";
+
+    // Employee table columns
+    private static final String COLUMN_EID = "eid";
+    private static final String COLUMN_ENAME = "ename";
+    private static final String COLUMN_ADEPT = "adept";
+    private static final String COLUMN_ESALARY = "esalary";
+
+    public EmployeeDatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        // Create employee table
+        String createTable = "CREATE TABLE " + TABLE_EMPLOYEE + " ("
+                + COLUMN_EID + " INTEGER PRIMARY KEY, "
+                + COLUMN_ENAME + " TEXT, "
+                + COLUMN_ADEPT + " TEXT, "
+                + COLUMN_ESALARY + " REAL)";
+        db.execSQL(createTable);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EMPLOYEE);
+        onCreate(db);
+    }
+
+    // Method to insert employee record
+    public void insertEmployee(int eid, String ename, String adept, float esalary) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_EID, eid);
+        values.put(COLUMN_ENAME, ename);
+        values.put(COLUMN_ADEPT, adept);
+        values.put(COLUMN_ESALARY, esalary);
+
+        db.insert(TABLE_EMPLOYEE, null, values);
+        db.close(); // Close database connection
+    }
+}
+
+
+MainActivity
+package com.example.yourapp;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText eidEditText;
+    private EditText enameEditText;
+    private EditText adeptEditText;
+    private EditText esalaryEditText;
+    private Button insertButton;
+    private EmployeeDatabaseHelper dbHelper;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        eidEditText = findViewById(R.id.eid);
+        enameEditText = findViewById(R.id.ename);
+        adeptEditText = findViewById(R.id.adept);
+        esalaryEditText = findViewById(R.id.esalary);
+        insertButton = findViewById(R.id.insertButton);
+
+        dbHelper = new EmployeeDatabaseHelper(this);
+
+        insertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                insertEmployee();
+            }
+        });
+    }
+
+    private void insertEmployee() {
+        String eidString = eidEditText.getText().toString().trim();
+        String ename = enameEditText.getText().toString().trim();
+        String adept = adeptEditText.getText().toString().trim();
+        String esalaryString = esalaryEditText.getText().toString().trim();
+
+        // Validate inputs
+        if (eidString.isEmpty() || ename.isEmpty() || adept.isEmpty() || esalaryString.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Parse employee ID and salary
+        int eid = Integer.parseInt(eidString);
+        float esalary = Float.parseFloat(esalaryString);
+
+        // Insert employee into database
+        dbHelper.insertEmployee(eid, ename, adept, esalary);
+        Toast.makeText(this, "Employee inserted successfully", Toast.LENGTH_SHORT).show();
+
+        // Clear input fields
+        eidEditText.setText("");
+        enameEditText.setText("");
+        adeptEditText.setText("");
+        esalaryEditText.setText("");
+    }
+}
+
+3>Create employee table
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/eid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Employee ID" />
+
+    <EditText
+        android:id="@+id/ename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eid"
+        android:hint="Employee Name" />
+
+    <EditText
+        android:id="@+id/adept"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ename"
+        android:hint="Department" />
+
+    <EditText
+        android:id="@+id/esalary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/adept"
+        android:hint="Salary"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/insertButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/esalary"
+        android:text="Insert Employee" />
+
+    <TextView
+        android:id="@+id/employeeList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/insertButton"
+        android:paddingTop="16dp"/>
+</RelativeLayout>
+
+package com.example.yourapp;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class EmployeeDatabaseHelper extends SQLiteOpenHelper {
+
+    private static final String DATABASE_NAME = "employee.db";
+    private static final int DATABASE_VERSION = 1;
+    private static final String TABLE_EMPLOYEE = "employee";
+
+    // Employee table columns
+    private static final String COLUMN_EID = "eid";
+    private static final String COLUMN_ENAME = "ename";
+    private static final String COLUMN_ADEPT = "adept";
+    private static final String COLUMN_ESALARY = "esalary";
+
+    public EmployeeDatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        // Create employee table
+        String createTable = "CREATE TABLE " + TABLE_EMPLOYEE + " ("
+                + COLUMN_EID + " INTEGER PRIMARY KEY, "
+                + COLUMN_ENAME + " TEXT, "
+                + COLUMN_ADEPT + " TEXT, "
+                + COLUMN_ESALARY + " REAL)";
+        db.execSQL(createTable);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EMPLOYEE);
+        onCreate(db);
+    }
+
+    // Method to insert employee record
+    public void insertEmployee(int eid, String ename, String adept, float esalary) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_EID, eid);
+        values.put(COLUMN_ENAME, ename);
+        values.put(COLUMN_ADEPT, adept);
+        values.put(COLUMN_ESALARY, esalary);
+
+        db.insert(TABLE_EMPLOYEE, null, values);
+        db.close(); // Close database connection
+    }
+
+    // Method to fetch all employees
+    public Cursor getAllEmployees() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.query(TABLE_EMPLOYEE, null, null, null, null, null, null);
+    }
+}
+
+package com.example.yourapp;
+
+import android.database.Cursor;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText eidEditText;
+    private EditText enameEditText;
+    private EditText adeptEditText;
+    private EditText esalaryEditText;
+    private Button insertButton;
+    private TextView employeeList;
+    private EmployeeDatabaseHelper dbHelper;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        eidEditText = findViewById(R.id.eid);
+        enameEditText = findViewById(R.id.ename);
+        adeptEditText = findViewById(R.id.adept);
+        esalaryEditText = findViewById(R.id.esalary);
+        insertButton = findViewById(R.id.insertButton);
+        employeeList = findViewById(R.id.employeeList);
+
+        dbHelper = new EmployeeDatabaseHelper(this);
+
+        insertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                insertEmployee();
+            }
+        });
+    }
+
+    private void insertEmployee() {
+        String eidString = eidEditText.getText().toString().trim();
+        String ename = enameEditText.getText().toString().trim();
+        String adept = adeptEditText.getText().toString().trim();
+        String esalaryString = esalaryEditText.getText().toString().trim();
+
+        // Validate inputs
+        if (eidString.isEmpty() || ename.isEmpty() || adept.isEmpty() || esalaryString.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Parse employee ID and salary
+        int eid = Integer.parseInt(eidString);
+        float esalary = Float.parseFloat(esalaryString);
+
+        // Insert employee into database
+        dbHelper.insertEmployee(eid, ename, adept, esalary);
+        Toast.makeText(this, "Employee inserted successfully", Toast.LENGTH_SHORT).show();
+
+        // Clear input fields
+        eidEditText.setText("");
+        enameEditText.setText("");
+        adeptEditText.setText("");
+        esalaryEditText.setText("");
+
+        // Display all employees
+        displayAllEmployees();
+    }
+
+    private void displayAllEmployees() {
+        Cursor cursor = dbHelper.getAllEmployees();
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (cursor.moveToFirst()) {
+            do {
+                int eid = cursor.getInt(cursor.getColumnIndex(EmployeeDatabaseHelper.COLUMN_EID));
+                String ename = cursor.getString(cursor.getColumnIndex(EmployeeDatabaseHelper.COLUMN_ENAME));
+                String adept = cursor.getString(cursor.getColumnIndex(EmployeeDatabaseHelper.COLUMN_ADEPT));
+                float esalary = cursor.getFloat(cursor.getColumnIndex(EmployeeDatabaseHelper.COLUMN_ESALARY));
+
+                stringBuilder.append("ID: ").append(eid)
+                        .append(", Name: ").append(ename)
+                        .append(", Dept: ").append(adept)
+                        .append(", Salary: ").append(esalary)
+                        .append("\n");
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        // Update the TextView with employee list
+        employeeList.setText(stringBuilder.toString());
+    }
+}
+
+4>First and last name
+
+activity_first.xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/firstNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="First Name" />
+
+    <EditText
+        android:id="@+id/lastNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/firstNameEditText"
+        android:hint="Last Name" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lastNameEditText"
+        android:text="Submit" />
+</RelativeLayout>
+
+activity_second.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/displayTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp" />
+</RelativeLayout>
+
+FA.java
+package com.example.yourapp;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class FirstActivity extends AppCompatActivity {
+
+    private EditText firstNameEditText;
+    private EditText lastNameEditText;
+    private Button submitButton;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_first);
+
+        firstNameEditText = findViewById(R.id.firstNameEditText);
+        lastNameEditText = findViewById(R.id.lastNameEditText);
+        submitButton = findViewById(R.id.submitButton);
+
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendDataToSecondActivity();
+            }
+        });
+    }
+
+    private void sendDataToSecondActivity() {
+        String firstName = firstNameEditText.getText().toString().trim();
+        String lastName = lastNameEditText.getText().toString().trim();
+
+        Intent intent = new Intent(FirstActivity.this, SecondActivity.class);
+        intent.putExtra("FIRST_NAME", firstName);
+        intent.putExtra("LAST_NAME", lastName);
+        startActivity(intent);
+    }
+}
+
+
+SA.java
+
+package com.example.yourapp;
+
+import android.os.Bundle;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SecondActivity extends AppCompatActivity {
+
+    private TextView displayTextView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_second);
+
+        displayTextView = findViewById(R.id.displayTextView);
+
+        // Get data from the Intent
+        String firstName = getIntent().getStringExtra("FIRST_NAME");
+        String lastName = getIntent().getStringExtra("LAST_NAME");
+
+        // Display the received data
+        displayTextView.setText("First Name: " + firstName + "\nLast Name: " + lastName);
+    }
+}
+
+
+5>First last name employee
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/firstNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="First Name:" />
+
+    <EditText
+        android:id="@+id/firstNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter First Name" />
+
+    <TextView
+        android:id="@+id/lastNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android
